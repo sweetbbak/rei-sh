@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"bytes"
 	"fmt"
 	"rei/ast"
 	"rei/lexer"
@@ -205,50 +204,13 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 
 	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
 	if err != nil {
-		fmat := p.ColorizeErrorMessage("could not parse %q as integer")
-		// msg := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
-		msg := fmt.Sprintf(fmat, p.curToken.Literal)
+		msg := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
 		p.errors = append(p.errors, msg)
 		return nil
 	}
 
 	lit.Value = value
 	return lit
-}
-
-func (p *Parser) ColorizeErrorMessage(format string) string {
-	end := len(format)
-	var buf bytes.Buffer
-
-	for i := 0; i < end; {
-		lasti := i
-		for i < end && format[i] != '%' {
-			i++
-		}
-
-		if i > lasti {
-			buf.WriteString(format[lasti:i])
-		}
-
-		buf.WriteString("\x1b[31m")
-
-		if i >= end {
-			buf.WriteString("\x1b[0m")
-			// done processing format string
-			break
-		}
-
-		ch := format[i]
-		for i < end && !('a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z') {
-			i++
-		}
-
-		buf.WriteString("\x1b[0m")
-		// Process one verb
-		i++
-	}
-
-	return buf.String()
 }
 
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {
